@@ -9,7 +9,7 @@ from keras.preprocessing import image
 from tensorflow.python.ops.gen_array_ops import concat
 from keras.applications.inception_v3 import preprocess_input
 
-model = load_model(r"Updated-Xception-diabetic-retinopathy.h5")
+model = load_model(r"Updated-Xception-diabetic-retinopathy-main.h5")
 app = Flask(__name__)
 
 @app.route('/')
@@ -59,24 +59,27 @@ def login():
 
 @app.route('/afterlogin', methods=['POST'])
 def afterlogin():
-  user = request.form['_id']
-  passw = request.form['psw']
-  print(user, passw)
+    user = request.form['_id']
+    passw = request.form['psw']
+    print(user, passw)
   
-  query = {'_id': {'$eq': user}}
+    query = {'_id': {'$eq': user}}
 
-  docs = my_database.get_query_result(query)
-  print(docs)
+    docs = my_database.get_query_result(query)
+    print(docs)
 
-  print(len(docs.all()))
+    print(len(docs.all()))
 
-  if(len(docs.all()) == 0):
-    return render_template('login.html', pred="User not found")
-  else:
-    if((user==docs[0][0]['_id'] and passw == docs[0][0]['psw'])):
-      return redirect(url_for('prediction'))
+    if len(docs.all()) == 0:
+        return render_template('login.html', pred="User not found")
     else:
-      print('invalid user')
+        user_doc = docs.all()[0]  # Assuming each document is a dictionary
+        if user == user_doc['_id'] and passw == user_doc['psw']:
+            return redirect(url_for('prediction'))
+        else:
+            return render_template('login.html', pred="Incorrect username or password")
+
+
 
 @app.route('/logout')
 def logout():
